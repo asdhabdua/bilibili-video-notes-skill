@@ -39,6 +39,76 @@ triggers:
 
 以 `1.2.3_TCP-IP模型_智能版.docx` 为标准：176行、7个大节、11张截图、多个对比表格、完整的 WHY 解释、助记口诀、考研要求和要点总结。每个知识点都有截图+文字+表格的三重保障。
 
+## 🤖 一键提示词（复制粘贴给 AI 即可使用）
+
+以下提示词适用于任何支持视觉的 AI（Hermes Agent、Claude、GPT-4V、Gemini 等）。用户只需复制粘贴，替换视频链接即可。
+
+---
+
+```
+请帮我做这个B站视频的笔记：【替换为B站视频链接】
+
+请按以下步骤执行：
+
+第0步：安装 skill（如果还没装的话）
+git clone https://github.com/asdhabdua/bilibili-video-notes-skill.git
+cd bilibili-video-notes-skill
+python install.py
+# install.py 会自动检测你的AI环境（Hermes/Claude/Codex），把文件放到正确位置
+
+第1步：读取 SKILL.md 了解完整工作流程
+# Hermes: 读 SKILL.md
+# Claude Code: 读 CLAUDE.md
+# Codex: 读 AGENTS.md
+
+第2步：配置 Cookie（用于下载B站AI字幕）
+# 让用户从浏览器获取 SESSDATA：
+# Edge/Chrome 打开 bilibili.com → F12 → Application → Cookies → SESSDATA
+# 复制值后写入 bilibili_cookies.txt
+# 如果用户暂时不想配置，可以跳过字幕，先用截图做笔记
+
+第3步：运行脚本
+python scripts/extract_frames.py <BV号> --page <页码> --mode cover --subtitle
+python scripts/smart_select.py <frames_dir>/fixed --skip-clustering
+
+第4步：两轮 Vision 打分（关键步骤，不能跳过）
+第一轮：按知识点分组（不是按视觉相似）
+  - 两张图结构一样但定义不同 → 不同知识点 → 都保留
+  - 例：frame_A 定义"实体+协议"，frame_B 定义"接口+服务" → 两张都要
+第二轮：每个知识点选最完整版
+  - 更多标签、箭头、标注、定义的那张胜出
+
+第5步：生成 DOCX 笔记
+# 写作标准（最重要）：
+# - 以顶级学者标准，融会贯通字幕+截图内容
+# - 追求知识完整性，宁可多写不可遗漏
+# - 不是照搬字幕，不是只写要点
+# - 分节用大标题，开头写考研要求，结尾写要点总结
+# - 每个知识点配截图+表格+公式+做题要点
+# - 保留助记口诀，解释 WHY（为什么这样设计）
+# - 不带时间戳，不覆盖已有文件
+
+第6步：清理
+# 删除视频MP4、JSON字幕、临时脚本
+# 保留字幕TXT（参考用）
+
+请从第0步开始执行。
+```
+
+---
+
+**使用方法：**
+1. 复制上面的提示词
+2. 把【替换为B站视频链接】改成实际链接
+3. 粘贴给 AI
+4. AI 会自动完成所有步骤
+
+**支持的 AI 平台：**
+- Hermes Agent（读 SKILL.md）
+- Claude Code（读 CLAUDE.md）
+- Codex（读 AGENTS.md）
+- GPT-4V / Gemini / 任何支持视觉的 AI（直接按提示词执行）
+
 ## 安装
 
 ### 方式一：Hermes Agent 用户（推荐）
