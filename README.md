@@ -254,19 +254,6 @@ MIT License - 自由使用和修改。
 - [python-docx](https://github.com/python-openxml/python-docx) - DOCX 生成
 
 
-## 🤝 贡献指南
-
-**提建议/报Bug**：[GitHub Issues](https://github.com/asdhabdua/bilibili-video-notes-skill/issues/new)
-
-**提交代码**：
-1. Fork 本仓库
-2. 创建分支：`git checkout -b feature/你的功能名`
-3. 提交更改：`git commit -m '添加了xxx功能'`
-4. 推送：`git push origin feature/你的功能名`
-5. 创建 Pull Request
-
-**改进笔记质量**：如果你发现了更好的截图选择策略、更清晰的排版方式，欢迎提交 PR！
-
 ## 📬 反馈与建议
 
 - **提建议/报Bug**：[GitHub Issues](https://github.com/asdhabdua/bilibili-video-notes-skill/issues/new)
