@@ -12,6 +12,55 @@
 
 ---
 
+## 🤖 一键提示词（复制粘贴给 AI 即可使用）
+
+复制以下提示词，替换视频链接，粘贴给任何支持视觉的 AI（Hermes、Claude、GPT-4V、Gemini 等），AI 会自动完成所有步骤。
+
+<details>
+<summary>点击展开提示词</summary>
+
+```
+请帮我做这个B站视频的笔记：【替换为B站视频链接】
+
+请按以下步骤执行：
+
+1. 读取 bilibili-video-notes/SKILL.md（或 CLAUDE.md/AGENTS.md）了解完整工作流程
+
+2. 安装依赖：
+pip install yt-dlp imagehash rapidocr-onnxruntime python-docx Pillow
+需要系统安装 ffmpeg
+
+3. 配置 Cookie（用于下载B站AI字幕）：
+   - 让用户从浏览器获取 SESSDATA：Edge/Chrome 打开 bilibili.com → F12 → Application → Cookies → SESSDATA
+   - 复制值后写入 bilibili_cookies.txt
+
+4. 运行脚本：
+python scripts/extract_frames.py <BV号> --page <页码> --mode cover --subtitle
+python scripts/smart_select.py <frames_dir>/fixed --skip-clustering
+
+5. 两轮 Vision 打分（关键步骤，不能跳过）：
+   第一轮：按知识点分组（不是按视觉相似）。两张图结构一样但定义不同→不同知识点→都保留
+   第二轮：每个知识点选最完整版（更多标签、箭头、标注的那张胜出）
+
+6. 生成 DOCX 笔记：
+   - 以顶级学者标准，融会贯通字幕+截图内容
+   - 追求知识完整性，宁可多写不可遗漏
+   - 不是照搬字幕，不是只写要点
+   - 分节用大标题，开头写考研要求，结尾写要点总结
+   - 每个知识点配截图+表格+公式+做题要点
+   - 保留助记口诀，解释 WHY（为什么这样设计）
+   - 不带时间戳
+   - 不覆盖已有文件，新建独立文件
+
+7. 清理：删除视频MP4、JSON字幕、临时脚本
+
+请开始执行。
+```
+
+</details>
+
+---
+
 ## ✨ 功能特点
 
 - 🎬 **自动下载** B站视频（720p）和 AI 字幕
