@@ -258,6 +258,6 @@ MIT License - 自由使用和修改。
 
 - **提建议/报Bug**：[GitHub Issues](https://github.com/asdhabdua/bilibili-video-notes-skill/issues/new)
 - **功能请求**：[GitHub Discussions](https://github.com/asdhabdua/bilibili-video-notes-skill/discussions)
-- **邮箱**：2080318589@qq.com
+- **邮箱**：eugenegengu@gmail.com
 
 欢迎提交 Issue 和 PR！
