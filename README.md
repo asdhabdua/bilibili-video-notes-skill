@@ -252,3 +252,12 @@ MIT License - 自由使用和修改。
 - [RapidOCR](https://github.com/RapidAI/RapidOCR) - OCR 文字识别
 - [ImageHash](https://github.com/JohannesBuchner/imagehash) - 感知哈希
 - [python-docx](https://github.com/python-openxml/python-docx) - DOCX 生成
+
+
+## 📬 反馈与建议
+
+- **提建议/报Bug**：[GitHub Issues](https://github.com/asdhabdua/bilibili-video-notes-skill/issues/new)
+- **功能请求**：[GitHub Discussions](https://github.com/asdhabdua/bilibili-video-notes-skill/discussions)
+- **邮箱**：2080318589@qq.com
+
+欢迎提交 Issue 和 PR！
