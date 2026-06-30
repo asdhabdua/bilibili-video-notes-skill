@@ -1,0 +1,5 @@
+yt-dlp
+imagehash
+rapidocr-onnxruntime
+python-docx
+Pillow

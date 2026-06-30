@@ -1,0 +1,24 @@
+# Cookie（真实值不上传）
+bilibili_cookies.txt
+
+# 视频文件
+*.mp4
+*.flv
+
+# 字幕原始数据（保留txt，不保留json）
+*_subtitles.json
+
+# 帧截图（太大，不上传）
+frames/
+fixed/
+selected/
+
+# 临时文件
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
+
+# 已处理的笔记（用户自己生成的，不上传）
+notes/
+*.docx
