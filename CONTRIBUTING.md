@@ -23,4 +23,4 @@
 ## 联系方式
 
 - GitHub Issues：https://github.com/asdhabdua/bilibili-video-notes-skill/issues
-- 邮箱：eugenegengu@gmail.com
+- 邮箱：EugenegengU@outlook.com
