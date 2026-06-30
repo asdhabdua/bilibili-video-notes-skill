@@ -91,7 +91,7 @@ python smart_select.py frames/fixed --skip-clustering
 
 ## 📖 使用方法
 
-### 基本用法
+### 基本用法（AI skill可以直接使用，如果没有agent可以按照这个流程使用）
 
 ```bash
 # 完整视频：下载 + 字幕 + 每10秒抽帧
