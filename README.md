@@ -2,7 +2,8 @@
 
 > **B站视频笔记生成Skill** — 从B站教育视频自动生成带截图的DOCX学习笔记
 
-> 从B站教育视频自动生成带截图的DOCX学习笔记
+
+> 从B站教育视频自动生成带截图的DOCX学习笔记，如果觉得有用的话记得点一下星标哦
 >
 > 全流程自动化：下载视频+字幕 → 全覆盖抽帧 → OCR去重 → AI视觉打分精选 → 融合生成DOCX
 
@@ -11,6 +12,7 @@
   <img src="https://img.shields.io/badge/python-3.9+-blue.svg?logo=python&style=flat-square" alt="Python">
   <img src="https://img.shields.io/badge/license-MIT-green.svg?style=flat-square" alt="License">
 </p>
+
 
 ---
 
