@@ -1,5 +1,20 @@
 # Bilibili Video Notes 📝
 
+## ⚡ 一键安装（复制粘贴给 AI）
+
+```
+请帮我安装 bilibili-video-notes-skill：
+
+git clone https://github.com/asdhabdua/bilibili-video-notes-skill.git
+cd bilibili-video-notes-skill
+python install.py
+
+安装完成后，读取 SKILL.md 了解如何使用。
+```
+
+---
+
+
 > **B站视频笔记生成Skill** — 从B站教育视频自动生成带截图的DOCX学习笔记
 
 > 从B站教育视频自动生成带截图的DOCX学习笔记
