@@ -1,6 +1,6 @@
 # Bilibili Video Notes 📝
 
-> **B站视频笔记生成工具** — 从B站教育/讲课视频自动生成带截图的DOCX学习笔记
+> **B站视频笔记生成工具** — 从B站教育/讲课视频自动生成带截图的DOCX学习笔记，如果觉得有用的话记得点一下星标哦
 >
 > 全流程：下载视频+字幕 → 全覆盖抽帧 → OCR去重 → AI视觉打分精选 → 提取图中内容 → 融合生成DOCX
 
@@ -76,7 +76,7 @@ VISION_MODEL=gpt-4o
 
 支持任何 OpenAI 兼容格式的多模态 API（OpenAI、Sophnet、本地 vLLM 等）。
 
-### 4. 配置 B 站 Cookie
+### 4. 配置 B 站 Cookie（可以直接告诉AI让他代劳）
 
 ```bash
 cp bilibili_cookies.txt.example bilibili_cookies.txt
