@@ -1,0 +1,4 @@
+# Netscape HTTP Cookie File
+# 将 YOUR_SESSDATA_HERE 替换为你从浏览器获取的 SESSDATA 值
+# 获取方法：F12 → Application → Cookies → bilibili.com → SESSDATA
+.bilibili.com	TRUE	/	FALSE	0	SESSDATA	YOUR_SESSDATA_HERE

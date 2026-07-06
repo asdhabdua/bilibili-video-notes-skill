@@ -1,0 +1,36 @@
+# 敏感配置
+.env
+bilibili_cookies.txt
+
+# 视频文件
+*.mp4
+*.flv
+*.mkv
+
+# 字幕原始数据（保留 txt）
+*_subtitles.json
+
+# 帧截图（太大，不上传）
+frames/
+fixed/
+selected/
+
+# 工作区临时文件
+workspace/
+*.log
+
+# 生成的笔记
+notes/
+*.docx
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.venv/
+venv/
+
+# 系统文件
+.DS_Store
+Thumbs.db
