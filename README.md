@@ -227,10 +227,6 @@ cp bilibili_cookies.txt.example bilibili_cookies.txt
 #### Hermes Agent 版
 
 ```
-请帮我做这个 B 站视频的笔记：https://www.bilibili.com/video/BV1xx411c7mD
-
-请严格按照本项目 SKILL.md 中的流程执行，不要凭印象。
-
 首先，帮我完成初始化配置：
 1. 克隆本仓库到当前工作目录：git clone https://github.com/asdhabdua/bilibili-video-notes-skill.git
 2. 进入项目目录并安装依赖：pip install -r scripts/requirements.txt
@@ -249,10 +245,6 @@ cp bilibili_cookies.txt.example bilibili_cookies.txt
 #### Claude Code 版
 
 ```
-请帮我完成从头到尾的 B 站视频笔记工作流。
-
-视频链接：https://www.bilibili.com/video/BV1xx411c7mD
-
 首先做初始化配置：
 1. git clone https://github.com/asdhabdua/bilibili-video-notes-skill.git
 2. cd bilibili-video-notes-skill
@@ -267,10 +259,6 @@ cp bilibili_cookies.txt.example bilibili_cookies.txt
 #### Codex CLI 版
 
 ```
-请帮我完成从头到尾的 B 站视频笔记工作流。
-
-视频链接：https://www.bilibili.com/video/BV1xx411c7mD
-
 首先完成初始化配置：
 1. git clone https://github.com/asdhabdua/bilibili-video-notes-skill.git
 2. cd bilibili-video-notes-skill
@@ -281,6 +269,7 @@ cp bilibili_cookies.txt.example bilibili_cookies.txt
 
 初始化完成后，等待用户下一步指令，工作时按 AGENTS.md 执行笔记生成流程。
 ```
+其实不是这三个Agent可也使用这套提示词，只需要把后面的“工作时按 xxx.md 执行笔记生成流程”删去即可
 
 ---
 
