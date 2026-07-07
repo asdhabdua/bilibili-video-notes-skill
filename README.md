@@ -222,7 +222,7 @@ cp bilibili_cookies.txt.example bilibili_cookies.txt
 
 ### 告诉 AI 让它代劳配置
 
-你不需要自己动手配置。把下面的提示词复制粘贴给 AI，它会帮你完成安装、配置，你只需要告诉他你的api、baseurl、模型名和SESSDATA(如何获得SESSDATA可见上一步)。
+你不需要自己动手配置。把下面的提示词复制粘贴给 AI，它会帮你完成安装、配置，你只需要告诉他你的api、baseurl、模型名和SESSDATA(如何获得SESSDATA可见上一步)
 
 #### Hermes Agent 版
 
@@ -269,7 +269,6 @@ cp bilibili_cookies.txt.example bilibili_cookies.txt
 
 初始化完成后，等待用户下一步指令，工作时按 AGENTS.md 执行笔记生成流程。
 ```
-
 其实不是这三个Agent可也使用这套提示词，只需要把后面的“工作时按 xxx.md 执行笔记生成流程”删去即可
 
 ---
@@ -308,8 +307,6 @@ cp bilibili_cookies.txt.example bilibili_cookies.txt
 已配置好 .env 和 bilibili_cookies.txt，按照 AGENTS.md 执行。
 ```
 
-不是这三个Agent可也使用这套提示词，让他按照 SKILL.md 流程执行，不要凭印象即可
-
 ### 笔记生成流程
 
 AI 会自动执行以下步骤：
@@ -318,11 +315,10 @@ AI 会自动执行以下步骤：
 2. **去重**：`smart_select.py` 用 OCR + 哈希去重，129帧 → 20-40帧
 3. **打分**：`score_frames_concurrent.py --mode score` 并发给所有帧打分
 4. **选帧**：AI 根据 score/theme 选出最终 7-12 帧
-5. **提取**：`score_frames_concurrent.py --mode extract` 并发提取图中文字/公式/表格/概念/因果链
-6. **提取字幕关键因果句**：`extract_key_sentences.py` 提取字幕中必须保留的 WHY 解释句
-7. **生成 DOCX**：基于字幕 + 图中内容生成笔记，确保因果句被覆盖
-8. **验证**：`verify_docx.py --subtitle` 检查 DOCX 格式和字幕因果句覆盖率
-9. **清理**：删除视频MP4、JSON字幕、临时脚本
+5. **提取**：`score_frames_concurrent.py --mode extract` 并发提取图中文字/公式/表格/概念
+6. **生成 DOCX**：基于字幕 + 图中内容生成笔记
+7. **验证**：`verify_docx.py` 检查 DOCX 格式
+8. **清理**：删除视频MP4、JSON字幕、临时脚本
 
 ### 查收结果
 
@@ -340,7 +336,7 @@ workspace/
 
 ---
 
-### 手动微调（如需要）
+### 第六步：手动微调（如需要）
 
 AI 生成的 DOCX 可能需要你微调：
 - 某些帧可能选得不太好，可以替换
@@ -405,7 +401,7 @@ python scripts/score_frames_concurrent.py \
 
 ### 4. 人工选最终帧
 
-根据 `vision_scores_pXX.json` 的 score 和 theme，人工(其实就是你的模型)决定最终使用哪几帧。
+根据 `vision_scores_pXX.json` 的 score 和 theme，人工决定最终使用哪几帧。
 
 ```bash
 mkdir -p ./frames/pXX/final
@@ -435,7 +431,7 @@ python ./workspace/gen_pXX_v1.py
 ### 7. 验证
 
 ```bash
-python scripts/verify_docx.py ./workspace/<output>.docx --subtitle ./workspace/<BV>_p<N>_subtitles.txt
+python scripts/verify_docx.py ./workspace/<output>.docx
 ```
 
 ### 8. 清理
@@ -527,7 +523,6 @@ bilibili-video-notes/
 │   ├── extract_frames.py
 │   ├── smart_select.py
 │   ├── score_frames_concurrent.py
-│   ├── extract_key_sentences.py
 │   ├── verify_docx.py
 │   ├── verify_checklist.py
 │   ├── clean_markdown_bold.py
