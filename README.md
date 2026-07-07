@@ -1,6 +1,6 @@
 # Bilibili Video Notes 📝
 
-> **B站视频笔记生成工具** — 从B站教育/讲课视频自动生成带截图的DOCX学习笔记，如果觉得有用的话记得点一下星标哟
+> **B站视频笔记生成工具** — 从B站教育/讲课视频自动生成带截图的DOCX学习笔记，如果觉得有用的话欢迎点一下星标哟🤗
 >
 > 全流程：下载视频+字幕 → 全覆盖抽帧 → OCR去重 → AI视觉打分精选 → 提取图中内容 → 融合生成DOCX
 
@@ -563,4 +563,4 @@ MIT License - 自由使用和修改。
 - **功能请求**：[GitHub Discussions](https://github.com/asdhabdua/bilibili-video-notes-skill/discussions)
 - **邮箱**：EugenegengU@outlook.com
 
-欢迎提交 Issue 和 PR！
+欢迎提交 Issue 和 PR！如果觉得有用的话欢迎点一下星标哟🤗
