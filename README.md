@@ -220,9 +220,9 @@ cp bilibili_cookies.txt.example bilibili_cookies.txt
 
 ---
 
-### 第四步：告诉 AI 让它代劳
+### 告诉 AI 让它代劳配置
 
-你不需要自己动手配置。把下面的提示词复制粘贴给 AI，它会帮你完成安装、配置、以及后续抽帧、去重、打分、写笔记的全部流程。
+你不需要自己动手配置。把下面的提示词复制粘贴给 AI，它会帮你完成安装、配置，你只需要告诉他你的api、baseurl、模型名和SESSDATA(如何获得SESSDATA可见上一步)
 
 #### Hermes Agent 版
 
