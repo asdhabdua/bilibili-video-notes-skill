@@ -70,15 +70,20 @@ python scripts/score_frames_concurrent.py \
   --mode extract \
   --workers 16
 
-# 6. generate DOCX
+# 6. extract key causal sentences from subtitles before writing DOCX
+python scripts/extract_key_sentences.py \
+  ./workspace/<bvid>_p<n>_subtitles.txt
+
+# 7. generate DOCX
 cp templates/docx_note_v2.py ./workspace/gen_pXX_v1.py
 # edit TITLE, SOURCE, FRAMES, SECTIONS based on subtitles + vision_extract_pXX.json
+# make sure causal sentences in <bvid>_p<n>_subtitles.key.json are covered
 python ./workspace/gen_pXX_v1.py
 
-# 7. verify
-python scripts/verify_docx.py ./workspace/<output>.docx
+# 8. verify (with subtitle key-sentence coverage check)
+python scripts/verify_docx.py ./workspace/<output>.docx --subtitle ./workspace/<bvid>_p<n>_subtitles.txt
 
-# 8. cleanup
+# 9. cleanup
 rm -f ./workspace/<bvid>_p<n>.mp4
 rm -f ./workspace/<bvid>_p<n>_subtitles.json
 rm -f ./workspace/gen_pXX_v1.py

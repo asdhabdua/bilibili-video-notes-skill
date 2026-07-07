@@ -36,11 +36,12 @@
       "frame_0001.jpg": {
         "theme": "Introduction",
         "score": 8,
-        "text": "图中出现的所有文字...",
-        "formulas": ["E = mc^2", "..."],
-        "tables": [{"headers": [...], "rows": [...]}],
-        "concepts": ["概念1: 定义", "概念2: 公式"],
-        "complete": true
+        "complete": true,
+        "text": "All readable text...",
+        "formulas": ["E = mc^2"],
+        "tables": [...],
+        "concepts": ["Concept: explanation with WHY"],
+        "reasoning": "Core causal chain or logical explanation shown in the image."
       },
       ...
     }
@@ -91,13 +92,13 @@ Please answer strictly in the following JSON format, with no extra content:
 'complete' means the screenshot is fully visible, not cropped or blocked.""".strip()
 
 EXTRACT_PROMPT = """This is a screenshot from an educational video (likely a lecture or course).
-Please extract all readable educational content from this image.
+Please extract all readable educational content from this image. Pay special attention to causal relationships, explanations, and logical chains shown or implied in the image.
 Answer strictly in the following JSON format, with no extra content:
 {
   "theme": "A short title summarizing the frame (5-15 words)",
   "score": 8,
   "complete": true,
-  "text": "All readable text in the image, transcribed faithfully. Include formulas, labels, and annotations.",
+  "text": "All readable text in the image, transcribed faithfully. If the image contains explanatory text, preserve the full causal chain (why / because / if...then / threshold / cost / overhead / retransmission, etc.).",
   "formulas": ["formula1", "formula2"],
   "tables": [
     {
@@ -107,9 +108,10 @@ Answer strictly in the following JSON format, with no extra content:
     }
   ],
   "concepts": [
-    "Concept name: its definition or explanation from the image",
-    "Another concept: its explanation"
-  ]
+    "Concept name: its definition or explanation from the image, including WHY if present",
+    "Another concept: its explanation, including WHY if present"
+  ],
+  "reasoning": "Core causal chain or logical explanation shown in the image. If no clear logic is shown, write 'None'."
 }
 'score' is content completeness from 1-10.
 'complete' means the screenshot is fully visible, not cropped or blocked.

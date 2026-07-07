@@ -74,25 +74,29 @@ mkdir -p ./frames/pXX/final
 cp ./frames/pXX/selected/frame_XXXX.jpg ./frames/pXX/final/
 
 # 5. 提取图中内容
-python scripts/score_frames_concurrent.py \
-  --frames ./frames/pXX/final \
-  --output ./workspace/vision_extract_pXX.json \
-  --mode extract \
+python scripts/score_frames_concurrent.py \\
+  --frames ./frames/pXX/final \\
+  --output ./workspace/vision_extract_pXX.json \\
+  --mode extract \\
   --workers 16
 
-# 6. 生成 DOCX
+# 6. 生成 DOCX 前，先提取字幕关键因果句
+python scripts/extract_key_sentences.py \\
+  ./workspace/<BV>_p<N>_subtitles.txt
+
+# 7. 生成 DOCX
 cp templates/docx_note_v2.py ./workspace/gen_pXX_v1.py
-# 编辑 TITLE/SOURCE/FRAMES/SECTIONS
+# 编辑 TITLE/SOURCE/FRAMES/SECTIONS，参考 <BV>_p<N>_subtitles.key.json 覆盖因果句
 python ./workspace/gen_pXX_v1.py
 
-# 7. 验证
-python scripts/verify_docx.py ./workspace/<output>.docx
+# 8. 验证（含字幕关键句覆盖检查）
+python scripts/verify_docx.py ./workspace/<output>.docx --subtitle ./workspace/<BV>_p<N>_subtitles.txt
 
-# 8. 清理
+# 9. 清理
 rm -f ./workspace/<BV>_p<N>.mp4
 rm -f ./workspace/<BV>_p<N>_subtitles.json
 rm -f ./workspace/gen_pXX_v1.py
-```
+
 
 ## 笔记写作标准
 

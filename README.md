@@ -1,6 +1,6 @@
 # Bilibili Video Notes 📝
 
-> **B站视频笔记生成工具** — 从B站教育/讲课视频自动生成带截图的DOCX学习笔记，如果觉得有用的话记得点一下星标哦
+> **B站视频笔记生成工具** — 从B站教育/讲课视频自动生成带截图的DOCX学习笔记，如果觉得有用的话欢迎点一下星标哟🤗
 >
 > 全流程：下载视频+字幕 → 全覆盖抽帧 → OCR去重 → AI视觉打分精选 → 提取图中内容 → 融合生成DOCX
 
@@ -15,7 +15,7 @@
 - [一键安装（复制粘贴给 AI）](#-%E4%B8%80%E9%94%AE%E5%AE%89%E8%A3%85%E5%A4%8D%E5%88%B6%E7%B2%98%E8%B4%B4%E7%BB%99-ai)
 - [功能特点](#-%E5%8A%9F%E8%83%BD%E7%89%B9%E7%82%B9)
 - [快速开始](#-%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B)
-- [详细使用教程](#-%E8%AF%A6%E7%BB%86%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B)
+- [详细使用教程(包括如何让AI代劳配置)](#-%E8%AF%A6%E7%BB%86%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B)
 - [配置好之后如何使用](#-%E9%85%8D%E7%BD%AE%E5%A5%BD%E4%B9%8B%E5%90%8E%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8)
 - [完整工作流](#-%E5%AE%8C%E6%95%B4%E5%B7%A5%E4%BD%9C%E6%B5%81)
 - [命令参考](#-%E5%91%BD%E4%BB%A4%E5%8F%82%E8%80%83)
@@ -220,17 +220,13 @@ cp bilibili_cookies.txt.example bilibili_cookies.txt
 
 ---
 
-### 第四步：告诉 AI 让它代劳
+### 告诉 AI 让它代劳配置
 
-你不需要自己动手配置。把下面的提示词复制粘贴给 AI，它会帮你完成安装、配置、以及后续抽帧、去重、打分、写笔记的全部流程。
+你不需要自己动手配置。把下面的提示词复制粘贴给 AI，它会帮你完成安装、配置，你只需要告诉他你的api、baseurl、模型名和SESSDATA(如何获得SESSDATA可见上一步)。
 
 #### Hermes Agent 版
 
 ```
-请帮我做这个 B 站视频的笔记：https://www.bilibili.com/video/BV1xx411c7mD
-
-请严格按照本项目 SKILL.md 中的流程执行，不要凭印象。
-
 首先，帮我完成初始化配置：
 1. 克隆本仓库到当前工作目录：git clone https://github.com/asdhabdua/bilibili-video-notes-skill.git
 2. 进入项目目录并安装依赖：pip install -r scripts/requirements.txt
@@ -238,7 +234,7 @@ cp bilibili_cookies.txt.example bilibili_cookies.txt
 4. 从 templates/env.example 复制出 .env，然后问我 API 配置（VISION_API_KEY、VISION_BASE_URL、VISION_MODEL），填入后给我确认
 5. 从 bilibili_cookies.txt.example 复制出 bilibili_cookies.txt，然后问我要 B 站 SESSDATA，填入后给我确认
 
-初始化完成后，再按 SKILL.md 执行笔记生成流程。
+初始化完成后，等待用户下一步指令，工作时按 SKILL.md 执行笔记生成流程。
 
 注意事项：
 - 帧目录必须是纯英文路径
@@ -249,10 +245,6 @@ cp bilibili_cookies.txt.example bilibili_cookies.txt
 #### Claude Code 版
 
 ```
-请帮我完成从头到尾的 B 站视频笔记工作流。
-
-视频链接：https://www.bilibili.com/video/BV1xx411c7mD
-
 首先做初始化配置：
 1. git clone https://github.com/asdhabdua/bilibili-video-notes-skill.git
 2. cd bilibili-video-notes-skill
@@ -261,16 +253,12 @@ cp bilibili_cookies.txt.example bilibili_cookies.txt
 5. cp templates/env.example .env，然后问我要 VISION_API_KEY / VISION_BASE_URL / VISION_MODEL，填入后让我确认
 6. cp bilibili_cookies.txt.example bilibili_cookies.txt，然后问我要 B 站 SESSDATA，填入后让我确认
 
-初始化完成后，再按 CLAUDE.md 执行笔记生成流程。
+初始化完成后，等待用户下一步指令，工作时按 CLAUDE.md 执行笔记生成流程。
 ```
 
 #### Codex CLI 版
 
 ```
-请帮我完成从头到尾的 B 站视频笔记工作流。
-
-视频链接：https://www.bilibili.com/video/BV1xx411c7mD
-
 首先完成初始化配置：
 1. git clone https://github.com/asdhabdua/bilibili-video-notes-skill.git
 2. cd bilibili-video-notes-skill
@@ -279,8 +267,10 @@ cp bilibili_cookies.txt.example bilibili_cookies.txt
 5. cp templates/env.example .env，然后问我要 VISION_API_KEY / VISION_BASE_URL / VISION_MODEL，填入后让我确认
 6. cp bilibili_cookies.txt.example bilibili_cookies.txt，然后问我要 B 站 SESSDATA，填入后让我确认
 
-初始化完成后，再按 AGENTS.md 执行笔记生成流程。
+初始化完成后，等待用户下一步指令，工作时按 AGENTS.md 执行笔记生成流程。
 ```
+
+其实不是这三个Agent可也使用这套提示词，只需要把后面的“工作时按 xxx.md 执行笔记生成流程”删去即可
 
 ---
 
@@ -318,6 +308,8 @@ cp bilibili_cookies.txt.example bilibili_cookies.txt
 已配置好 .env 和 bilibili_cookies.txt，按照 AGENTS.md 执行。
 ```
 
+不是这三个Agent可也使用这套提示词，让他按照 SKILL.md 流程执行，不要凭印象即可
+
 ### 笔记生成流程
 
 AI 会自动执行以下步骤：
@@ -326,10 +318,11 @@ AI 会自动执行以下步骤：
 2. **去重**：`smart_select.py` 用 OCR + 哈希去重，129帧 → 20-40帧
 3. **打分**：`score_frames_concurrent.py --mode score` 并发给所有帧打分
 4. **选帧**：AI 根据 score/theme 选出最终 7-12 帧
-5. **提取**：`score_frames_concurrent.py --mode extract` 并发提取图中文字/公式/表格/概念
-6. **生成 DOCX**：基于字幕 + 图中内容生成笔记
-7. **验证**：`verify_docx.py` 检查 DOCX 格式
-8. **清理**：删除视频MP4、JSON字幕、临时脚本
+5. **提取**：`score_frames_concurrent.py --mode extract` 并发提取图中文字/公式/表格/概念/因果链
+6. **提取字幕关键因果句**：`extract_key_sentences.py` 提取字幕中必须保留的 WHY 解释句
+7. **生成 DOCX**：基于字幕 + 图中内容生成笔记，确保因果句被覆盖
+8. **验证**：`verify_docx.py --subtitle` 检查 DOCX 格式和字幕因果句覆盖率
+9. **清理**：删除视频MP4、JSON字幕、临时脚本
 
 ### 查收结果
 
@@ -347,7 +340,7 @@ workspace/
 
 ---
 
-### 第六步：手动微调（如需要）
+### 手动微调（如需要）
 
 AI 生成的 DOCX 可能需要你微调：
 - 某些帧可能选得不太好，可以替换
@@ -412,7 +405,7 @@ python scripts/score_frames_concurrent.py \
 
 ### 4. 人工选最终帧
 
-根据 `vision_scores_pXX.json` 的 score 和 theme，人工决定最终使用哪几帧。
+根据 `vision_scores_pXX.json` 的 score 和 theme，人工(其实就是你的模型)决定最终使用哪几帧。
 
 ```bash
 mkdir -p ./frames/pXX/final
@@ -442,7 +435,7 @@ python ./workspace/gen_pXX_v1.py
 ### 7. 验证
 
 ```bash
-python scripts/verify_docx.py ./workspace/<output>.docx
+python scripts/verify_docx.py ./workspace/<output>.docx --subtitle ./workspace/<BV>_p<N>_subtitles.txt
 ```
 
 ### 8. 清理
@@ -534,6 +527,7 @@ bilibili-video-notes/
 │   ├── extract_frames.py
 │   ├── smart_select.py
 │   ├── score_frames_concurrent.py
+│   ├── extract_key_sentences.py
 │   ├── verify_docx.py
 │   ├── verify_checklist.py
 │   ├── clean_markdown_bold.py
@@ -563,4 +557,4 @@ MIT License - 自由使用和修改。
 - **功能请求**：[GitHub Discussions](https://github.com/asdhabdua/bilibili-video-notes-skill/discussions)
 - **邮箱**：EugenegengU@outlook.com
 
-欢迎提交 Issue 和 PR！
+欢迎提交 Issue 和 PR！如果觉得有用的话欢迎点一下星标哟🤗
