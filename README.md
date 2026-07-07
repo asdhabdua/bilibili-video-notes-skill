@@ -238,7 +238,7 @@ cp bilibili_cookies.txt.example bilibili_cookies.txt
 4. 从 templates/env.example 复制出 .env，然后问我 API 配置（VISION_API_KEY、VISION_BASE_URL、VISION_MODEL），填入后给我确认
 5. 从 bilibili_cookies.txt.example 复制出 bilibili_cookies.txt，然后问我要 B 站 SESSDATA，填入后给我确认
 
-初始化完成后，再按 SKILL.md 执行笔记生成流程。
+初始化完成后，等待用户下一步指令，工作时按 SKILL.md 执行笔记生成流程。
 
 注意事项：
 - 帧目录必须是纯英文路径
@@ -261,7 +261,7 @@ cp bilibili_cookies.txt.example bilibili_cookies.txt
 5. cp templates/env.example .env，然后问我要 VISION_API_KEY / VISION_BASE_URL / VISION_MODEL，填入后让我确认
 6. cp bilibili_cookies.txt.example bilibili_cookies.txt，然后问我要 B 站 SESSDATA，填入后让我确认
 
-初始化完成后，再按 CLAUDE.md 执行笔记生成流程。
+初始化完成后，等待用户下一步指令，工作时按 CLAUDE.md 执行笔记生成流程。
 ```
 
 #### Codex CLI 版
@@ -279,7 +279,7 @@ cp bilibili_cookies.txt.example bilibili_cookies.txt
 5. cp templates/env.example .env，然后问我要 VISION_API_KEY / VISION_BASE_URL / VISION_MODEL，填入后让我确认
 6. cp bilibili_cookies.txt.example bilibili_cookies.txt，然后问我要 B 站 SESSDATA，填入后让我确认
 
-初始化完成后，再按 AGENTS.md 执行笔记生成流程。
+初始化完成后，等待用户下一步指令，工作时按 AGENTS.md 执行笔记生成流程。
 ```
 
 ---
