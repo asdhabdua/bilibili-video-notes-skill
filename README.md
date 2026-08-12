@@ -1,3 +1,5 @@
+
+
 # Bilibili Video Notes 📝
 
 > **B站视频笔记生成工具** — 从B站教育/讲课视频自动生成带截图的DOCX学习笔记，如果觉得有用的话欢迎点一下星标哟🤗
@@ -424,7 +426,13 @@ python scripts/score_frames_concurrent.py \
   --workers 16
 ```
 
-### 6. 生成 DOCX
+### 6. 提取字幕关键因果句
+
+```bash
+python scripts/extract_key_sentences.py ./workspace/<BV>_p<N>_subtitles.txt
+```
+
+### 7. 生成 DOCX
 
 ```bash
 cp templates/docx_note_v2.py ./workspace/gen_pXX_v1.py
@@ -432,13 +440,13 @@ cp templates/docx_note_v2.py ./workspace/gen_pXX_v1.py
 python ./workspace/gen_pXX_v1.py
 ```
 
-### 7. 验证
+### 8. 验证
 
 ```bash
 python scripts/verify_docx.py ./workspace/<output>.docx --subtitle ./workspace/<BV>_p<N>_subtitles.txt
 ```
 
-### 8. 清理
+### 9. 清理
 
 ```bash
 rm -f ./workspace/BV1xx411c7mD_p1.mp4
