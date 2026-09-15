@@ -79,16 +79,68 @@ def seconds_to_time(s: float) -> str:
     return f"{m:02d}m{sec:02d}s"
 
 
-def get_video_info(bvid: str) -> dict:
-    """Get video metadata from Bilibili API."""
+_UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
+       "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+
+
+def _video_info_via_pagelist(bvid: str) -> dict:
+    """Fallback: get cid/title/pages from the pagelist API.
+
+    B站 的 x/web-interface/view 接口对部分境外 IP 直接返回 412 (request was
+    banned)，但 x/player/pagelist 不受影响，且同样返回每个分P的 cid/part/duration。
+    """
     import urllib.request
-    url = f"https://api.bilibili.com/x/web-interface/view?bvid={bvid}"
-    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+
+    headers = {
+        "User-Agent": _UA,
+        "Referer": f"https://www.bilibili.com/video/{bvid}/",
+        "Accept": "application/json, text/plain, */*",
+    }
+    sessdata = get_cookie_value(COOKIE_FILE, "SESSDATA") if os.path.exists(COOKIE_FILE) else ""
+    if sessdata:
+        headers["Cookie"] = f"SESSDATA={sessdata}"
+
+    url = f"https://api.bilibili.com/x/player/pagelist?bvid={bvid}"
+    req = urllib.request.Request(url, headers=headers)
     with urllib.request.urlopen(req) as resp:
         data = json.loads(resp.read())
-    if data["code"] != 0:
-        raise RuntimeError(f"API error: {data}")
-    return data["data"]
+    if data.get("code") != 0:
+        raise RuntimeError(f"pagelist API error: {data}")
+
+    pages = data["data"]
+    return {
+        "bvid": bvid,
+        "title": pages[0].get("part") or bvid,
+        "pages": pages,
+    }
+
+
+def get_video_info(bvid: str) -> dict:
+    """Get video metadata from Bilibili API, falling back to pagelist on 412."""
+    import urllib.request
+    import urllib.error
+
+    url = f"https://api.bilibili.com/x/web-interface/view?bvid={bvid}"
+    headers = {
+        "User-Agent": _UA,
+        "Referer": "https://www.bilibili.com/",
+        "Accept": "application/json, text/plain, */*",
+        "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
+    }
+    sessdata = get_cookie_value(COOKIE_FILE, "SESSDATA") if os.path.exists(COOKIE_FILE) else ""
+    if sessdata:
+        headers["Cookie"] = f"SESSDATA={sessdata}"
+
+    try:
+        req = urllib.request.Request(url, headers=headers)
+        with urllib.request.urlopen(req) as resp:
+            data = json.loads(resp.read())
+        if data["code"] != 0:
+            raise RuntimeError(f"API error: {data}")
+        return data["data"]
+    except (urllib.error.HTTPError, urllib.error.URLError, RuntimeError) as e:
+        print(f"[warn] view API unavailable ({e}); falling back to pagelist API")
+        return _video_info_via_pagelist(bvid)
 
 
 def get_cookie_value(cookie_file: str, name: str) -> str:
@@ -124,8 +176,10 @@ def download_subtitles(bvid: str, page: int, start: float = None, end: float = N
         sessdata = get_cookie_value(COOKIE_FILE, "SESSDATA")
         player_url = f"https://api.bilibili.com/x/player/wbi/v2?bvid={bvid}&cid={cid}"
         req = urllib.request.Request(player_url, headers={
-            "User-Agent": "Mozilla/5.0",
-            "Referer": "https://www.bilibili.com",
+            "User-Agent": _UA,
+            "Referer": f"https://www.bilibili.com/video/{bvid}/",
+            "Accept": "application/json, text/plain, */*",
+            "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
             "Cookie": f"SESSDATA={sessdata}",
         })
         with urllib.request.urlopen(req) as resp:
@@ -141,7 +195,10 @@ def download_subtitles(bvid: str, page: int, start: float = None, end: float = N
             sub_url = "https:" + sub_url
 
         print(f"[subtitle] Downloading: {subtitles[0].get('lan_doc', 'unknown')}")
-        req = urllib.request.Request(sub_url, headers={"User-Agent": "Mozilla/5.0"})
+        req = urllib.request.Request(sub_url, headers={
+            "User-Agent": _UA,
+            "Referer": f"https://www.bilibili.com/video/{bvid}/",
+        })
         with urllib.request.urlopen(req) as resp:
             data = json.loads(resp.read())
 
