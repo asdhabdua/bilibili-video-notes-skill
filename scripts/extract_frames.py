@@ -2,19 +2,19 @@
 B站视频智能抽帧 + 字幕下载工具
 功能：
   1. 下载B站视频（支持时间段裁剪）
-  2. 场景检测 + 聚合去重抽帧（适合讲课视频）
+  2. 场景检测 + 保底抽帧（适合讲课视频，大幅减少帧数）
   3. 固定间隔抽帧（对比用）
   4. 下载AI字幕（JSON + 带时间戳的TXT）
 
 用法：
-  python extract_frames.py <bvid> [--page N] [--start MM:SS] [--end MM:SS] [--mode scene|fixed|both] [--subtitle] [--interval 30] [--threshold 0.04] [--merge-gap 5]
+  python extract_frames.py <bvid> [--page N] [--start MM:SS] [--end MM:SS] [--mode scene|fixed|cover|both] [--subtitle] [--interval 30] [--threshold 0.04] [--merge-gap 5] [--backup-interval 30]
 
 示例：
-  # 完整视频，场景检测 + 字幕
-  python extract_frames.py BV1xx411c7mD --page 1 --mode scene --subtitle
+  # 讲课视频推荐：场景检测 + 30秒保底 + 字幕
+  python extract_frames.py BV1xx411c7mD --page 1 --mode scene --subtitle --backup-interval 30
 
-  # 只处理 5:00-10:00 片段，固定 20s 间隔 + 字幕
-  python extract_frames.py BV1xx411c7mD --page 1 --start 5:00 --end 10:00 --mode fixed --interval 20 --subtitle
+  # 固定间隔（非讲课视频）
+  python extract_frames.py BV1xx411c7mD --page 1 --mode fixed --interval 20 --subtitle
 
   # 只下载字幕，不抽帧
   python extract_frames.py BV1xx411c7mD --page 1 --subtitle --mode fixed --interval 9999
@@ -112,7 +112,7 @@ def download_subtitles(bvid: str, page: int, start: float = None, end: float = N
     cid = info["pages"][page - 1]["cid"]
     title = info["pages"][page - 1]["part"]
 
-    safe_name = re.sub(r'[<>:"/\\|?*]', '_', f"{bvid}_p{page}")
+    safe_name = re.sub(r'[<>:\"/\\|?*]', '_', f"{bvid}_p{page}")
     sub_path = os.path.join(WORKSPACE, f"{safe_name}_subtitles.json")
 
     if os.path.exists(sub_path):
@@ -185,7 +185,7 @@ def download_video(bvid: str, page: int, start: str = None, end: str = None) -> 
     cid = info["pages"][page - 1]["cid"]
     title = info["pages"][page - 1]["part"]
 
-    safe_name = re.sub(r'[<>:"/\\|?*]', '_', f"{bvid}_p{page}")
+    safe_name = re.sub(r'[<>:\"/\\|?*]', '_', f"{bvid}_p{page}")
     output_path = os.path.join(WORKSPACE, f"{safe_name}.mp4")
 
     # If time range specified, use a different filename to avoid overwriting full video
@@ -265,11 +265,28 @@ def extract_fixed_frames(video_path: str, interval: int = 30) -> list:
     return frames
 
 
-def extract_scene_frames(video_path: str, threshold: float = 0.04, merge_gap: float = 5.0) -> list:
+def get_video_duration(video_path: str) -> float:
+    """Get video duration in seconds using ffprobe."""
+    cmd = [
+        "ffprobe", "-v", "error",
+        "-show_entries", "format=duration",
+        "-of", "default=noprint_wrappers=1:nokey=1",
+        video_path,
+    ]
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    try:
+        return float(result.stdout.strip())
+    except (ValueError, TypeError):
+        return 0.0
+
+
+def extract_scene_frames(video_path: str, threshold: float = 0.04, merge_gap: float = 5.0,
+                          backup_interval: float = 0.0) -> list:
     """
-    Extract frames using scene detection + clustering.
+    Extract frames using scene detection + backup interval.
     - threshold: scene change sensitivity (lower = more sensitive)
     - merge_gap: merge scene changes within N seconds into one
+    - backup_interval: if > 0, force a frame every N seconds (prevents missing long static slides)
     """
     out_dir = os.path.join(FRAMES_DIR, "scene")
     os.makedirs(out_dir, exist_ok=True)
@@ -282,46 +299,70 @@ def extract_scene_frames(video_path: str, threshold: float = 0.04, merge_gap: fl
     cmd = [
         "ffmpeg", "-y", "-i", video_path,
         "-vf", f"select='gt(scene,{threshold})',showinfo",
-        "-vsync", "vfr",
+        "-fps_mode", "vfr",
         "-q:v", "2",
         os.path.join(out_dir, "raw_%04d.jpg"),
     ]
-    result = subprocess.run(cmd, capture_output=True, text=True, check=False)
+    result = subprocess.run(cmd, capture_output=True, text=True, encoding='utf-8', errors='replace', check=False)
 
     # Parse timestamps from showinfo output
     timestamps = []
-    for line in result.stderr.split("\n"):
-        m = re.search(r"pts_time:(\d+\.?\d*)", line)
-        if m:
-            timestamps.append(float(m.group(1)))
+    if result.stderr:
+        for line in result.stderr.split("\n"):
+            m = re.search(r"pts_time:(\d+\.?\d*)", line)
+            if m:
+                timestamps.append(float(m.group(1)))
 
     print(f"[scene] Detected {len(timestamps)} raw scene changes")
 
-    if not timestamps:
-        # Fallback: if no scene changes, use fixed interval
+    if not timestamps and backup_interval <= 0:
+        # Fallback: if no scene changes and no backup, use fixed 30s interval
         print("[scene] No scene changes detected, falling back to fixed 30s interval")
         return extract_fixed_frames(video_path, 30)
 
     # Pass 2: cluster nearby timestamps (within merge_gap seconds)
     clusters = []
-    current_cluster = [timestamps[0]]
-    for t in timestamps[1:]:
-        if t - current_cluster[-1] <= merge_gap:
-            current_cluster.append(t)
-        else:
-            clusters.append(current_cluster)
-            current_cluster = [t]
-    clusters.append(current_cluster)
+    if timestamps:
+        current_cluster = [timestamps[0]]
+        for t in timestamps[1:]:
+            if t - current_cluster[-1] <= merge_gap:
+                current_cluster.append(t)
+            else:
+                clusters.append(current_cluster)
+                current_cluster = [t]
+        clusters.append(current_cluster)
 
     # Take the middle timestamp from each cluster
     key_timestamps = [c[len(c) // 2] for c in clusters]
     print(f"[scene] Merged into {len(key_timestamps)} clusters (gap={merge_gap}s)")
 
+    # Pass 2b: add backup timestamps (force a frame every backup_interval seconds)
+    if backup_interval > 0:
+        duration = get_video_duration(video_path)
+        backup_ts = []
+        t = 0.0
+        while t < duration:
+            backup_ts.append(t)
+            t += backup_interval
+
+        # Merge: skip backup timestamps that are too close to a scene keyframe
+        # (within half the backup interval, the scene frame is better)
+        min_dist = backup_interval / 2
+        filtered_backup = []
+        for bt in backup_ts:
+            too_close = any(abs(bt - kt) < min_dist for kt in key_timestamps)
+            if not too_close:
+                filtered_backup.append(bt)
+
+        key_timestamps = sorted(set(key_timestamps + filtered_backup))
+        print(f"[scene] Added {len(filtered_backup)} backup frames (every {backup_interval}s), "
+              f"total {len(key_timestamps)} timestamps")
+
     # Clean raw frames
     for f in glob.glob(os.path.join(out_dir, "raw_*.jpg")):
         os.remove(f)
 
-    # Pass 3: extract exact keyframes at cluster timestamps
+    # Pass 3: extract exact keyframes at timestamps
     for i, ts in enumerate(key_timestamps):
         out_file = os.path.join(out_dir, f"frame_{i+1:04d}_{seconds_to_time(ts)}.jpg")
         cmd = [
@@ -347,13 +388,15 @@ def main():
     parser.add_argument("--start", help="起始时间 MM:SS 或 HH:MM:SS")
     parser.add_argument("--end", help="结束时间 MM:SS 或 HH:MM:SS")
     parser.add_argument("--mode", choices=["scene", "fixed", "cover", "both"], default="scene",
-                        help="抽帧模式: scene=场景检测, fixed=固定间隔, cover=全覆盖(每10秒,用于后续打分筛选)")
+                        help="抽帧模式: scene=场景检测+保底(推荐讲课视频), fixed=固定间隔, cover=全覆盖(每10秒,用于后续打分筛选)")
     parser.add_argument("--interval", type=int, default=30,
                         help="固定间隔秒数 (默认 30, cover模式默认10)")
     parser.add_argument("--threshold", type=float, default=0.04,
                         help="场景检测阈值 (默认 0.04)")
     parser.add_argument("--merge-gap", type=float, default=5.0,
                         help="场景聚合间隔秒数 (默认 5)")
+    parser.add_argument("--backup-interval", type=float, default=30.0,
+                        help="场景检测模式下的保底间隔秒数，每N秒至少抽一帧防止漏掉长讲解页面 (默认 30, 设为0禁用)")
     parser.add_argument("--no-download", action="store_true",
                         help="跳过下载，使用已有视频文件")
     parser.add_argument("--subtitle", action="store_true",
@@ -382,7 +425,7 @@ def main():
 
     # Step 2: Download video
     if args.no_download:
-        safe_name = re.sub(r'[<>:"/\\|?*]', '_', f"{args.bvid}_p{args.page}")
+        safe_name = re.sub(r'[<>:\"/\\|?*]', '_', f"{args.bvid}_p{args.page}")
         if args.start or args.end:
             range_tag = f"_{args.start or '0'}-{args.end or 'end'}".replace(":", "")
             video_path = os.path.join(WORKSPACE, f"{safe_name}{range_tag}.mp4")
@@ -395,7 +438,7 @@ def main():
     else:
         video_path = download_video(args.bvid, args.page, args.start, args.end)
 
-    # Step 2: Extract frames
+    # Step 3: Extract frames
     if args.mode == "cover":
         # Cover mode: fixed interval, default 10s for full coverage
         cover_interval = args.interval if args.interval != 30 else 10
@@ -404,7 +447,7 @@ def main():
         extract_fixed_frames(video_path, args.interval)
 
     if args.mode in ("scene", "both"):
-        extract_scene_frames(video_path, args.threshold, args.merge_gap)
+        extract_scene_frames(video_path, args.threshold, args.merge_gap, args.backup_interval)
 
     print("\n[done] All frames extracted successfully!")
 
