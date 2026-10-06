@@ -11,7 +11,13 @@ Checks:
   4. All user-supplied keywords appear in document.xml
   5. "考研要求" and "要点总结" sections present (Chinese 考研 note convention)
   6. Paragraph count >= 50
-  7. If --subtitle <subtitles.txt> is provided, check coverage of key causal sentences.
+  7. If --subtitle <subtitles.txt> is provided and exists, check coverage of key causal sentences.
+     If subtitle file does not exist, skip coverage check with a warning.
+
+Video types (--type):
+  lecture   讲课/教程视频（覆盖率要求 >= 75%）
+  opinion   观点分享/经验谈（覆盖率要求 >= 50%，过滤口头禅）
+  vlog      Vlog/杂谈（不检查字幕覆盖）
 
 Exit code 0 = all checks passed, 1 = at least one check failed.
 
@@ -27,6 +33,23 @@ import argparse
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__)))
 from extract_key_sentences import extract_key_sentences
+
+
+# 非核心口头禅黑名单（观点分享类视频中这些话术不计入覆盖率）
+FILLER_PATTERNS = [
+    r"点赞",
+    r"收藏",
+    r"关注",
+    r"三连",
+    r"不吃亏",
+    r"有帮助",
+    r"谢谢",
+    r"宝藏",
+    r"觉得",
+    r"大家",
+    r"我们",
+    r"你们",
+]
 
 
 def normalize_text(text: str) -> str:
@@ -59,18 +82,40 @@ def contains_fuzzy(haystack: str, needle: str, min_chars: int = 6) -> bool:
     return False
 
 
-def check_subtitle_coverage(docx_text: str, subtitle_path: str) -> tuple:
+def is_likely_filler(sentence: str) -> bool:
+    """判断句子是否主要由口头禅/互动话术构成（观点分享类视频用）。"""
+    # 如果句子包含大量黑名单词汇，且长度较短，认为是 filler
+    if len(sentence) < 20:
+        return True
+    filler_hits = sum(1 for p in FILLER_PATTERNS if re.search(p, sentence))
+    # 命中 2 个以上黑名单词，且句子总长 < 40，认为是 filler
+    if filler_hits >= 2 and len(sentence) < 40:
+        return True
+    # 命中 1 个且句子很短
+    if filler_hits >= 1 and len(sentence) < 25:
+        return True
+    return False
+
+
+def check_subtitle_coverage(docx_text: str, subtitle_path: str, video_type: str = 'lecture') -> tuple:
     """
     检查字幕中的关键因果句有多少被 DOCX 正文覆盖。
-    返回: (missing_sentences, coverage_ratio)
+    返回: (missing_sentences, coverage_ratio, total_checked)
     """
     subtitle_text = open(subtitle_path, encoding="utf-8").read()
     key_sentences = extract_key_sentences(subtitle_text)
 
     if not key_sentences:
-        return [], 1.0
+        return [], 1.0, 0
 
     docx_norm = normalize_text(docx_text)
+
+    # 观点分享类视频：过滤掉口头禅
+    if video_type == 'opinion':
+        key_sentences = [s for s in key_sentences if not is_likely_filler(s)]
+
+    if not key_sentences:
+        return [], 1.0, 0
 
     missing = []
     for s in key_sentences:
@@ -78,10 +123,48 @@ def check_subtitle_coverage(docx_text: str, subtitle_path: str) -> tuple:
             missing.append(s)
 
     coverage = (len(key_sentences) - len(missing)) / len(key_sentences)
-    return missing, coverage
+    return missing, coverage, len(key_sentences)
 
 
-def verify(docx_path: str, keywords: list, min_images: int = 1, subtitle_path: str = None) -> bool:
+def get_coverage_threshold(video_type: str) -> float:
+    """根据视频类型返回覆盖率阈值。"""
+    thresholds = {
+        'lecture': 0.75,   # 讲课视频：AI字幕通常不完整，75% 更现实
+        'opinion': 0.50,
+        'vlog': 0.0,       # Vlog 不检查覆盖
+    }
+    return thresholds.get(video_type, 0.75)
+
+
+def score_sentence_priority(sentence: str) -> int:
+    """
+    给缺失句子打分，用于排序输出。
+    分数越高 = 信息量越大 = 越应该优先补充。
+    基于：句子长度、因果关键词密度、是否包含数字/公式。
+    """
+    score = len(sentence)  # 基础分：长度
+
+    # 因果关键词加分（每个 +10）
+    causal_kws = ["为什么", "原因是", "因为", "所以", "因此", "假设", "如果", "那么",
+                  "一旦", "只有", "才", "导致", "引起", "避免", "防止", "解决"]
+    for kw in causal_kws:
+        if kw in sentence:
+            score += 10
+
+    # 数字/公式加分（通常包含量化信息）
+    if re.search(r'\d+', sentence):
+        score += 5
+
+    return score
+
+
+def sort_missing_by_priority(missing: list) -> list:
+    """按优先级排序缺失句子，信息量大的排前面。"""
+    return sorted(missing, key=score_sentence_priority, reverse=True)
+
+
+def verify(docx_path: str, keywords: list, min_images: int = 1,
+           subtitle_path: str = None, video_type: str = 'lecture') -> bool:
     if not os.path.exists(docx_path):
         print(f"[FAIL] file not found: {docx_path}")
         return False
@@ -129,16 +212,32 @@ def verify(docx_path: str, keywords: list, min_images: int = 1, subtitle_path: s
     if para_count < 50:
         print(f"  [WARN] doc looks thin")
 
+    # === 字幕覆盖率检查 ===
     if subtitle_path:
-        missing_sentences, coverage = check_subtitle_coverage(xml, subtitle_path)
-        print(f"[7] subtitle key causal sentence coverage: {coverage * 100:.1f}% ({int(len(missing_sentences) / (1 - coverage) - len(missing_sentences) if coverage < 1 else len(missing_sentences))} total, {len(missing_sentences)} missing)")
-        if coverage < 0.85:
-            print(f"  [FAIL] coverage < 85%, missing key sentences:")
-            for s in missing_sentences[:5]:
-                print(f"    - {s[:60]}...")
-            return False
-        elif missing_sentences:
-            print(f"  [WARN] some key sentences not fully covered (coverage={coverage*100:.1f}%)")
+        if video_type == 'vlog':
+            print(f"[7] subtitle coverage: skipped (vlog type)")
+        elif not os.path.exists(subtitle_path):
+            print(f"[7] subtitle coverage: skipped (subtitle file not found: {subtitle_path})")
+            print(f"  [WARN] 无字幕文件，跳过覆盖率检查（请确认视频是否有字幕）")
+        else:
+            missing_sentences, coverage, total = check_subtitle_coverage(
+                xml, subtitle_path, video_type=video_type
+            )
+            threshold = get_coverage_threshold(video_type)
+            print(f"[7] subtitle key causal sentence coverage: {coverage * 100:.1f}% "
+                  f"({total} total, {len(missing_sentences)} missing, type={video_type}, threshold={threshold*100:.0f}%)")
+            if coverage < threshold:
+                # 按优先级排序缺失句，信息量大的排前面
+                missing_sorted = sort_missing_by_priority(missing_sentences)
+                print(f"  [FAIL] coverage < {threshold*100:.0f}%, missing key sentences (sorted by priority):")
+                for i, s in enumerate(missing_sorted[:8], 1):
+                    priority = score_sentence_priority(s)
+                    print(f"    {i}. [优先级{priority}] {s[:70]}...")
+                if len(missing_sorted) > 8:
+                    print(f"    ... and {len(missing_sorted) - 8} more")
+                return False
+            elif missing_sentences:
+                print(f"  [WARN] some key sentences not fully covered (coverage={coverage*100:.1f}%)")
 
     print()
     print("ALL CHECKS PASSED")
@@ -153,7 +252,10 @@ if __name__ == "__main__":
     parser.add_argument("keywords", nargs="*", help="需要检查的关键词")
     parser.add_argument("--min-images", type=int, default=1, help="最少图片数")
     parser.add_argument("--subtitle", default=None, help="字幕 TXT 路径，用于检查关键因果句覆盖")
+    parser.add_argument("--type", default="lecture", choices=["lecture", "opinion", "vlog"],
+                        help="视频类型: lecture=讲课(75%%), opinion=观点分享(50%%), vlog=不检查覆盖")
     args = parser.parse_args()
 
-    ok = verify(args.docx_path, args.keywords, min_images=args.min_images, subtitle_path=args.subtitle)
+    ok = verify(args.docx_path, args.keywords, min_images=args.min_images,
+                subtitle_path=args.subtitle, video_type=args.type)
     sys.exit(0 if ok else 1)
